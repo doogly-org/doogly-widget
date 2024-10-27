@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Donation Example</title>
+</head>
+<body>
+    <h1>Support Our Project</h1>
+    <p>Help us reach our goal by making a crypto donation.</p>
+    <div id="donation-button-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="./crypto-donation-script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded and parsed');
+            if (typeof window.initCryptoDonation === 'function') {
+                console.log('initCryptoDonation function is available');
+                try {
+                    window.initCryptoDonation({
+                        destinationChain: 'optimism',
+                        destinationAddress: '0x578ba68dfdd446ec306b4feb4564055135f98982',
+                        splitsAddress: '0x264f9EF85C21DE49451c3636116668889Ca41aab',
+                        hypercertFractionId: '1',
+                        buttonText: 'Donate ETH',
+                        buttonColor: '#892BE2',
+                        modalTitle: 'Support Our Cause',
+                        contractAddress: '0x62fafc5deae85d93849c0450cb6651287e901238',
+                        containerElement: document.getElementById('donation-button-container')
+                    });
+                    console.log('initCryptoDonation called successfully');
+                } catch (error) {
+                    console.error('Error calling initCryptoDonation:', error);
+                }
+            } else {
+                console.error('initCryptoDonation function is not available');
+            }
+        });
+    </script>
+</body>
+</html>
