@@ -19,7 +19,6 @@
   const chainOptions = [
     { id: 10, name: 'Optimism' },
     { id: 8453, name: 'Base' },
-    { id: 42220, name: 'Celo' },
   ];
 
   function createModal(config, uniswapTokens, currentChain) {
@@ -48,7 +47,7 @@
       <div style="background-color: white; margin: 10% auto; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px;">
         <h2 id="crypto-donate-modal-title" style="color: #892BE2; font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">${config.modalTitle || 'Make a Donation'}</h2>
         <div style="margin-bottom: 1rem;">
-          <label for="crypto-donate-wallet-address" style="display: block; margin-bottom: 0.5rem; color: #4b5563;">Wallet Address (this address will be receiving the hypercert)</label>
+          <label for="crypto-donate-wallet-address" style="display: block; margin-bottom: 0.5rem; color: #4b5563;">Wallet Address</label>
           <input id="crypto-donate-wallet-address" type="text" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; background-color: #f3f4f6;">
         </div>
         <div style="margin-bottom: 1rem;">
@@ -175,8 +174,25 @@
     }
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const userAddress = await signer.getAddress();
+    let signer;
+    let userAddress;
+
+    // Check if the wallet is connected
+    if (window.ethereum !== 'undefined') {
+        signer = provider.getSigner();
+        const accounts = await provider.listAccounts(); // Fetch accounts
+        if (accounts.length > 0) {
+            userAddress = accounts[0]; // Use the first account
+        } else {
+            // Prompt user to connect their wallet
+            console.log('No accounts found. Prompting to connect wallet...');
+            await connectWallet(); // Call the connectWallet function
+            return; // Exit after attempting to connect
+        }
+    } else {
+        button.textContent = 'Connect Wallet'; // Update button text if wallet is not connected
+        button.onclick = connectWallet; // Set click handler to connect wallet
+    }
 
     // Get the current chain ID
     const network = await provider.getNetwork();
@@ -187,10 +203,28 @@
     // Fetch user's tokens and check Uniswap pools
     let uniswapTokens = await fetchUserTokensAndUniswapPools(provider, userAddress, chainId, contract);
 
+    // Set loading message
+    const loadingMessage = document.createElement('div');
+    loadingMessage.id = 'loading-message';
+    loadingMessage.textContent = 'Loading...';
+    loadingMessage.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      color: #892BE2;
+      z-index: 1001; // Ensure it's above other elements
+    `;
+    document.body.appendChild(loadingMessage); // Add loading message to the body
+
     const button = createDonationButton(config);
     const modal = createModal(config, uniswapTokens, { id: chainId, name: getChainName(chainId) });
     document.body.appendChild(button);
     document.body.appendChild(modal);
+
+    // Remove loading message after initialization
+    document.body.removeChild(loadingMessage);
 
     const walletAddressInput = document.getElementById('crypto-donate-wallet-address');
     const totalRaisedInput = document.getElementById('crypto-donate-total-raised');
@@ -443,8 +477,7 @@
   function getNativeToken(chainId) {
     const nativeTokens = {
       10: { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000' },
-      8453: { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000' },
-      42220: { symbol: 'CELO', name: 'Celo', address: '0x0000000000000000000000000000000000000000' },
+      8453: { symbol: 'ETH', name: 'Ethereum', address: '0x0000000000000000000000000000000000000000' }
     };
     return nativeTokens[chainId] || { symbol: 'NATIVE', name: 'Native Token', address: '0x0000000000000000000000000000000000000000' };
   }
@@ -453,35 +486,17 @@
     const apiUrls = {
       10: 'https://api-optimistic.etherscan.io/api',
       8453: 'https://api.basescan.org/api',
-      42220: 'https://api.celoscan.io/api',
     };
     return apiUrls[chainId];
   }
 
   function getExplorerApiKey(chainId) {
     const apiKeys = {
-      10: 'OPTIMISM_API_KEY',
-      8453: 'BASE_API_KEY',
-      42220: 'CELO_API_KEY',
+      10: '9HBFD3UFSTQV71132ZASZ4T6M6Y1VHDGKM',
+      8453: 'X4R5GNYKKD34HKQGEVC6SXGHI62EGUYNJ8',
+      42220: '4MY7GCBJXMB181R771BY5HRSCAQN2PXTUN',
     };
     return apiKeys[chainId];
-  }
-
-  async function getCurrentChain(provider) {
-    try {
-      const network = await provider.getNetwork();
-      const chainId = network.chainId;
-      const chains = {
-        1: { id: 'ethereum', name: 'Ethereum' },
-        56: { id: 'binance', name: 'Binance Smart Chain' },
-        137: { id: 'polygon', name: 'Polygon' },
-        // Add more chains as needed
-      };
-      return chains[chainId] || { id: 'unknown', name: 'Unknown Chain' };
-    } catch (error) {
-      console.error('Failed to get current chain:', error);
-      return { id: 'unknown', name: 'Unknown Chain' };
-    }
   }
 
   async function switchChain(chainId) {
