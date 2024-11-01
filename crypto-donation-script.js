@@ -173,6 +173,21 @@
       return;
     }
 
+    // Set loading message
+    const loadingMessage = document.createElement('div');
+    loadingMessage.id = 'loading-message';
+    loadingMessage.textContent = 'Loading...';
+    loadingMessage.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.5rem;
+      color: white;
+      z-index: 1001; // Ensure it's above other elements
+    `;
+    document.body.appendChild(loadingMessage); // Add loading message to the body
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let signer;
     let userAddress;
@@ -202,21 +217,6 @@
 
     // Fetch user's tokens and check Uniswap pools
     let uniswapTokens = await fetchUserTokensAndUniswapPools(provider, userAddress, chainId, contract);
-
-    // Set loading message
-    const loadingMessage = document.createElement('div');
-    loadingMessage.id = 'loading-message';
-    loadingMessage.textContent = 'Loading...';
-    loadingMessage.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5rem;
-      color: #892BE2;
-      z-index: 1001; // Ensure it's above other elements
-    `;
-    document.body.appendChild(loadingMessage); // Add loading message to the body
 
     const button = createDonationButton(config);
     const modal = createModal(config, uniswapTokens, { id: chainId, name: getChainName(chainId) });
