@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribute to Commons Forest</title>
+    <style>
+      body {
+          background-image: url('./banner.png'); /* Update with your image path */
+          background-size: cover; /* Ensures the image covers the entire background */
+          background-position: center; /* Centers the image */
+          font-family: Arial, sans-serif; /* Sets a clean font for the page */
+          color: #ffffff; /* Sets text color to white for better contrast */
+          text-align: center; /* Centers text alignment */
+          padding: 20px; /* Adds padding around the body */
+      }
+      h1 {
+          font-size: 2.5em; /* Increases the size of the main heading */
+          margin-bottom: 20px; /* Adds space below the heading */
+      }
+      p {
+          font-size: 1.2em; /* Increases the size of the paragraph text */
+          margin-bottom: 30px; /* Adds space below the paragraph */
+      }
+  </style>
+</head>
+<body>
+    <h1>Contribute to Commons Forest</h1>
+    <p>If you have enjoyed the party please show love by making some contributions.</p>
+    <div id="donation-button-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="./crypto-donation-script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded and parsed');
+            if (typeof window.initCryptoDonation === 'function') {
+                console.log('initCryptoDonation function is available');
+                try {
+                    window.initCryptoDonation({
+                        destinationChain: 'optimism',
+                        destinationAddress: '0x578ba68dfdd446ec306b4feb4564055135f98982',
+                        splitsAddress: '0x61C5f2a37D65A173Eaf4157f02D4FD10043e2455',
+                        hypercertFractionId: '18668571214016525982527657712921667616899072',
+                        buttonText: 'Contribute',
+                        buttonColor: '#892BE2',
+                        modalTitle: 'Show love to Commons Forest',
+                        contractAddress: '0x62fafc5deae85d93849c0450cb6651287e901238',
+                        containerElement: document.getElementById('donation-button-container')
+                    });
+                    console.log('initCryptoDonation called successfully');
+                } catch (error) {
+                    console.error('Error calling initCryptoDonation:', error);
+                }
+            } else {
+                console.error('initCryptoDonation function is not available');
+            }
+        });
+    </script>
+</body>
+</html>
